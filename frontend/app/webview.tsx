@@ -47,6 +47,8 @@ export default function WebViewScreen() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [activeDownloads, setActiveDownloads] = useState<Download[]>([]);
+  const [currentOrientation, setCurrentOrientation] = useState<ScreenOrientation.Orientation>(ScreenOrientation.Orientation.PORTRAIT_UP);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   
   // Estado para el FAB con swipe gesture
   const fabOpacity = useRef(new Animated.Value(0)).current;
@@ -56,6 +58,7 @@ export default function WebViewScreen() {
     loadServerUrl();
     setupNotifications();
     loadActiveDownloads();
+    setupOrientationListener();
     
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -65,9 +68,70 @@ export default function WebViewScreen() {
     // Configurar PanResponder para swipe desde el borde izquierdo
     return () => {
       backHandler.remove();
+      ScreenOrientation.removeOrientationChangeListeners();
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT).catch(() => {});
     };
   }, []);
+
+  // Efecto para manejar cambios de orientación cuando hay video
+  useEffect(() => {
+    handleOrientationChange();
+  }, [currentOrientation, isVideoPlaying]);
+
+  const setupOrientationListener = async () => {
+    // Desbloquear orientación para permitir rotación
+    await ScreenOrientation.unlockAsync();
+    
+    // Listener para cambios de orientación
+    ScreenOrientation.addOrientationChangeListener((event) => {
+      setCurrentOrientation(event.orientationInfo.orientation);
+    });
+  };
+
+  const handleOrientationChange = () => {
+    const isLandscape = 
+      currentOrientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+      currentOrientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT;
+    
+    const isPortrait = 
+      currentOrientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+      currentOrientation === ScreenOrientation.Orientation.PORTRAIT_DOWN;
+
+    // Si hay video reproduciéndose y el usuario gira a landscape
+    if (isVideoPlaying && isLandscape && !isFullscreen) {
+      enterFullscreen();
+    }
+    
+    // Si está en fullscreen y el usuario vuelve a portrait
+    if (isFullscreen && isPortrait) {
+      exitFullscreen();
+    }
+  };
+
+  const enterFullscreen = () => {
+    webViewRef.current?.injectJavaScript(`
+      (function() {
+        try {
+          const videos = document.querySelectorAll('video');
+          if (videos.length > 0) {
+            const playingVideo = Array.from(videos).find(v => !v.paused);
+            if (playingVideo) {
+              if (playingVideo.requestFullscreen) {
+                playingVideo.requestFullscreen();
+              } else if (playingVideo.webkitRequestFullscreen) {
+                playingVideo.webkitRequestFullscreen();
+              } else if (playingVideo.webkitEnterFullscreen) {
+                playingVideo.webkitEnterFullscreen();
+              }
+            }
+          }
+        } catch(e) {
+          console.log('Error entering fullscreen:', e);
+        }
+      })();
+      true;
+    `);
+  };
 
   // PanResponder para detectar swipe desde el borde izquierdo
   const panResponder = useRef(
