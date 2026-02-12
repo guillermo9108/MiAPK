@@ -226,20 +226,39 @@ Consulta los archivos de documentación:
 - El WebView solo carga contenido cuando está en un dispositivo móvil o emulador
 - En web preview, algunas funcionalidades estarán limitadas
 
-## ✨ Mejoras v2.1
+## ✨ Mejoras v3.0
 
-### FAB Auto-Ocultable
-- **Antes**: FAB siempre visible, podía obstruir contenido
-- **Ahora**: 
-  - Solo aparece cuando el usuario interactúa
-  - Se oculta automáticamente después de 3 segundos
-  - No interfiere con el contenido web
-  - Completamente oculto en modo fullscreen
+### 🎯 FAB Reposicionado y Mejorado
+- **Antes (v2.1)**: Esquina inferior derecha, aparecía automáticamente con cada interacción
+- **Ahora (v3.0)**: 
+  - ✅ Esquina superior izquierda (no estorba)
+  - ✅ Activación manual por swipe desde el borde izquierdo
+  - ✅ Solo aparece cuando el usuario lo desea
+  - ✅ Badge con número de descargas activas
+  - ✅ Indicador visual de swipe en el borde
 
-### Detección de Interacciones
-- Scroll (> 50px de cambio)
-- Touch events
-- Actividad del usuario
+### 📥 Gestor de Descargas Completo (NUEVO)
+- **Pantalla dedicada** para gestión de archivos descargados
+- **Descargas activas** con progreso en tiempo real
+- **Historial persistente** de todas las descargas
+- **Visualización offline** - accede a archivos sin conexión
+- **Gestión avanzada**:
+  - Eliminar archivos individuales
+  - Limpiar historial completo
+  - Eliminar todos los archivos
+  - Información detallada de cada archivo
+
+### 🎨 Menú Modal Mejorado
+- Diseño más elegante y espacioso
+- Acceso directo al gestor de descargas
+- Badge de descargas activas visible
+- Animaciones suaves
+
+### 🖐️ Gestos Intuitivos
+- **Swipe desde izquierda** → Mostrar FAB
+- **Tap en FAB** → Abrir menú
+- **Tap fuera** → Cerrar todo
+- **Botón atrás** → Navegación secuencial
 
 ## 🚀 Próximos Pasos
 
