@@ -28,28 +28,51 @@
 - Persistencia con AsyncStorage
 - Diseño atractivo con tema StreamPay
 
-#### 3. WebView Principal (`app/webview.tsx`) - **v2.1**
+#### 3. WebView Principal (`app/webview.tsx`) - **v3.0**
 - ✅ Carga la PWA de StreamPay
-- ✅ **FAB (Floating Action Button) auto-ocultable**
-  - Aparece al detectar interacciones del usuario
-  - Se oculta automáticamente después de 3 segundos
-  - No interfiere con el contenido web
+- ✅ **FAB en esquina superior izquierda** (nueva ubicación)
+  - Activación manual por swipe desde borde izquierdo
+  - Badge con número de descargas activas
+  - Solo aparece cuando el usuario lo solicita
+- ✅ **Indicador de swipe visual** en el borde izquierdo
 - ✅ Configuración optimizada para video streaming
 - ✅ Manejo del botón atrás de Android
-- ✅ Menú contextual con opciones:
+- ✅ **Menú modal mejorado** con:
+  - Acceso a gestor de descargas (NEW)
   - Recargar página
   - Limpiar caché
   - Ir a configuración
 - ✅ Soporte de fullscreen para videos
 - ✅ Sistema de notificaciones para:
   - Reproducción de audio
-  - Descargas de archivos con progreso
+  - Descargas de archivos con progreso en tiempo real
 - ✅ Manejo avanzado de descargas con FileSystem
-- ✅ Inyección de JavaScript para detección de:
-  - Scroll (> 50px)
-  - Touch events
-  - Fullscreen changes
-- ✅ User Agent personalizado: `StreamPayAPK/2.1`
+- ✅ User Agent personalizado: `StreamPayAPK/3.0`
+
+#### 4. Gestor de Descargas (`app/downloads.tsx`) - **¡NUEVO EN v3.0!**
+- ✅ **Vista de descargas activas**
+  - Barra de progreso en tiempo real (0-100%)
+  - Tamaño del archivo
+  - Actualización automática cada 2 segundos
+- ✅ **Historial completo de descargas**
+  - Lista persistente de todos los archivos
+  - Indicadores de estado (completado/fallido/descargando)
+  - Información detallada (nombre, tamaño, fecha)
+  - Timestamps relativos ("Hace 5m", "Hace 2h")
+- ✅ **Visualización offline**
+  - Acceso a archivos sin conexión
+  - Vista de detalles del archivo
+  - Información de ruta local
+- ✅ **Gestión de archivos**
+  - Eliminar archivos individuales
+  - Limpiar historial completo
+  - Eliminar todos los archivos
+  - Confirmaciones de seguridad
+- ✅ **Interfaz elegante**
+  - Header con navegación
+  - Estado vacío informativo
+  - Diseño card-based
+  - Iconos de estado coloridos
 
 ## 🚀 Cómo Usar
 
