@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,11 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Index() {
   const router = useRouter();
 
-  useEffect(() => {
-    checkServerConfig();
-  }, []);
-
-  const checkServerConfig = async () => {
+  const checkServerConfig = useCallback(async () => {
     try {
       const serverUrl = await AsyncStorage.getItem('SERVER_URL');
       
@@ -25,7 +21,11 @@ export default function Index() {
       console.error('Error checking server config:', error);
       router.replace('/config');
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    checkServerConfig();
+  }, [checkServerConfig]);
 
   return (
     <View style={styles.container}>
