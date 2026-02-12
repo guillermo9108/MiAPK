@@ -403,6 +403,7 @@ export default function WebViewScreen() {
   const injectedJavaScript = `
     (function() {
       try {
+        // Detectar cambios de fullscreen
         document.addEventListener('fullscreenchange', function() {
           window.ReactNativeWebView.postMessage(JSON.stringify({
             type: 'fullscreenchange',
@@ -417,16 +418,81 @@ export default function WebViewScreen() {
           }));
         });
 
-        const videos = document.querySelectorAll('video');
-        videos.forEach(video => {
-          video.addEventListener('dblclick', function() {
-            if (this.requestFullscreen) {
-              this.requestFullscreen();
-            } else if (this.webkitRequestFullscreen) {
-              this.webkitRequestFullscreen();
+        // Función para notificar estado de reproducción
+        function notifyVideoState(isPlaying) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'videostate',
+            isPlaying: isPlaying
+          }));
+        }
+
+        // Monitorear todos los videos actuales y futuros
+        function setupVideoListeners() {
+          const videos = document.querySelectorAll('video');
+          videos.forEach(video => {
+            // Evitar agregar listeners múltiples veces
+            if (video.hasAttribute('data-rn-monitored')) return;
+            video.setAttribute('data-rn-monitored', 'true');
+
+            // Listener para play
+            video.addEventListener('play', function() {
+              notifyVideoState(true);
+            });
+
+            // Listener para pause
+            video.addEventListener('pause', function() {
+              notifyVideoState(false);
+            });
+
+            // Listener para ended
+            video.addEventListener('ended', function() {
+              notifyVideoState(false);
+            });
+
+            // Doble click para fullscreen
+            video.addEventListener('dblclick', function() {
+              if (this.requestFullscreen) {
+                this.requestFullscreen();
+              } else if (this.webkitRequestFullscreen) {
+                this.webkitRequestFullscreen();
+              } else if (this.webkitEnterFullscreen) {
+                this.webkitEnterFullscreen();
+              }
+            });
+          });
+        }
+
+        // Configurar listeners iniciales
+        setupVideoListeners();
+
+        // Observador para detectar nuevos videos agregados dinámicamente
+        const observer = new MutationObserver(function(mutations) {
+          setupVideoListeners();
+        });
+
+        // Observar cambios en el DOM
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+
+        // Verificar periódicamente si hay videos reproduciéndose
+        setInterval(function() {
+          const videos = document.querySelectorAll('video');
+          let isAnyPlaying = false;
+          videos.forEach(function(video) {
+            if (!video.paused && !video.ended) {
+              isAnyPlaying = true;
             }
           });
-        });
+          
+          // Solo notificar si cambió el estado
+          if (window._lastVideoState !== isAnyPlaying) {
+            window._lastVideoState = isAnyPlaying;
+            notifyVideoState(isAnyPlaying);
+          }
+        }, 500); // Verificar cada 500ms
+
       } catch(e) {
         console.log('Injection error:', e);
       }
