@@ -1,8 +1,8 @@
-# StreamPay Cliente Android v2.1
+# StreamPay Cliente Android v3.0
 
 ## 📱 Resumen
 
-**StreamPay** es una aplicación móvil desarrollada con Expo + React Native que funciona como cliente para conectarse a un servidor PWA de streaming de video. La aplicación permite a los usuarios configurar una conexión a su servidor local de StreamPay y acceder a contenido de streaming de video.
+**StreamPay** es una aplicación móvil desarrollada con Expo + React Native que funciona como cliente para conectarse a un servidor PWA de streaming de video. La aplicación permite a los usuarios configurar una conexión a su servidor local de StreamPay, acceder a contenido de streaming de video, y **gestionar descargas con visualización offline**.
 
 ## ✅ Estado Actual
 
