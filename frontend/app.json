@@ -20,7 +20,10 @@
       "infoPlist": {
         "NSCameraUsageDescription": "StreamPay necesita acceso a la cámara para subir fotos de productos en el marketplace",
         "NSPhotoLibraryUsageDescription": "Accede a tus fotos para compartir en el marketplace",
-        "UIViewControllerBasedStatusBarAppearance": true
+        "UIViewControllerBasedStatusBarAppearance": true,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "android": {
