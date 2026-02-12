@@ -351,7 +351,7 @@ export default function WebViewScreen() {
         allowsFullscreenVideo={true}
         allowsInlineMediaPlayback={true}
         mixedContentMode="always"
-        userAgent="Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 StreamPayAPK/2.1"
+        userAgent="Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36 StreamPayAPK/2.1"
         cacheEnabled={true}
         cacheMode="LOAD_CACHE_ELSE_NETWORK"
         incognito={false}
