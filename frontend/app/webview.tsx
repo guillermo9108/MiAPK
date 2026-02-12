@@ -238,11 +238,12 @@ export default function WebViewScreen() {
       if (data.type === 'fullscreenchange') {
         setIsFullscreen(data.isFullscreen);
         if (data.isFullscreen) {
-          await ScreenOrientation.unlockAsync();
           toggleFab(false); // Ocultar FAB en fullscreen
-        } else {
-          await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
         }
+      }
+      
+      if (data.type === 'videostate') {
+        setIsVideoPlaying(data.isPlaying);
       }
       
       if (data.type === 'download') {
