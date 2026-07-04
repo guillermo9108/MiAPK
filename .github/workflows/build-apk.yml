@@ -1,0 +1,154 @@
+name: Build, Version and Release APK
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+      - 'devel'
+      - 'developer'
+  pull_request:
+    branches:
+      - 'main'
+      - 'master'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and Release Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for commit/push flexibility
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Restore Debug Keystore
+        run: |
+          if [ -f debug.keystore.base64 ]; then
+            echo "Decoding debug keystore..."
+            base64 -d debug.keystore.base64 > debug.keystore
+          else
+            echo "No debug.keystore.base64 found, generating fallback key..."
+            # Fallback to keytool generation if file does not exist
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Build Debug APK
+        run: |
+          if [ -f gradlew ]; then
+            echo "Using local gradle wrapper..."
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          else
+            echo "Using system gradle..."
+            gradle assembleDebug
+          fi
+
+      - name: Verify APK Generated
+        run: |
+          echo "Listing Gradle outputs:"
+          ls -la app/build/outputs/apk/debug/
+
+      - name: Update README with Release Links
+        shell: python
+        run: |
+          import re
+          import os
+
+          run_number = os.getenv("GITHUB_RUN_NUMBER", "1")
+          repo = os.getenv("GITHUB_REPOSITORY", "guillermo910802/StreamPay")
+          version = f"v1.0.{run_number}"
+          apk_filename = f"StreamPay-{version}.apk"
+          download_url = f"https://github.com/{repo}/releases/download/{version}/{apk_filename}"
+
+          print(f"Target Version: {version}")
+          print(f"Target Download URL: {download_url}")
+
+          # Read README.md
+          with open("README.md", "r", encoding="utf-8") as f:
+              content = f.read()
+
+          # 1. Replace version text in the comment marker block
+          content = re.sub(
+              r'(<!-- APK_VERSION_TEXT_START -->)(.*?)(<!-- APK_VERSION_TEXT_END -->)',
+              rf'\1`{version}`\3',
+              content
+          )
+
+          # 2. Replace download badge block
+          badge_url = f"https://img.shields.io/badge/Download-APK%20{version}-green?style=for-the-badge&logo=android&logoColor=white"
+          content = re.sub(
+              r'(<!-- DOWNLOAD_BUTTON_START -->)(.*?)(<!-- DOWNLOAD_BUTTON_END -->)',
+              rf'\1\n[![Descargar APK]({badge_url})]({download_url})\n\3',
+              content,
+              flags=re.DOTALL
+          )
+
+          # 3. Replace direct download link block
+          content = re.sub(
+              r'(<!-- DOWNLOAD_URL_START -->)(.*?)(<!-- DOWNLOAD_URL_END -->)',
+              rf'\1\n🔗 [{apk_filename}]({download_url})\n\3',
+              content,
+              flags=re.DOTALL
+          )
+
+          # Write back to README.md
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(content)
+
+          print("README.md successfully updated with latest version download URLs.")
+
+      - name: Commit and Push Updated README
+        continue-on-error: true
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          
+          # Only commit/push if README has actually changed
+          if ! git diff --cached --quiet; then
+            echo "Changes detected in README.md, committing..."
+            git commit -m "docs: actualizar enlace de descarga a v1.0.${{ github.run_number }} [skip ci]"
+            git push
+          else
+            echo "No changes found in README.md, skipping commit."
+          fi
+
+      - name: Create GitHub Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "Release StreamPay v1.0.${{ github.run_number }}"
+          body: |
+            ## 🎉 StreamPay v1.0.${{ github.run_number }}
+
+            Compilación automatizada completada correctamente.
+            
+            ### 📦 Cambios Realizados:
+            - APK compilada automáticamente desde el evento de push.
+            - Número de versión autoincrementado a `1.0.${{ github.run_number }}`.
+            
+            ### ⬇️ Enlaces de descarga:
+            * [Descargar StreamPay-v1.0.${{ github.run_number }}.apk](https://github.com/${{ github.repository }}/releases/download/v1.0.${{ github.run_number }}/StreamPay-v1.0.${{ github.run_number }}.apk)
+          files: |
+            app/build/outputs/apk/debug/StreamPay-v1.0.${{ github.run_number }}.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

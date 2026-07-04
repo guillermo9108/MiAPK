@@ -1,0 +1,7 @@
+{
+  "name": "StreamPay",
+  "description": "StreamPay APK client for fast streaming, configuration, and sequential video downloads.",
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
